@@ -1,0 +1,61 @@
+# Version de Docker Compose utilisée (ici, la version 3)
+version: '3'
+
+# Définition des services
+services:
+  # Service Nginx
+  nginx:
+    # Utilisation de l'image officielle de Nginx en version 1.22, basée sur Alpine Linux
+    image: nginx:1.22-alpine
+    # Mappage des ports entre l'hôte et le conteneur
+    ports:
+      - "8080:80"  # Le port 8080 de l'hôte est mappé sur le port 80 du conteneur
+    # Définition des volumes pour partager des fichiers ou répertoires
+    volumes:
+      - ./:/code  # Le répertoire courant de l'hôte est monté dans /code du conteneur
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Le fichier nginx.conf local remplace la configuration par défaut de Nginx
+   # Service PHP
+  php: 
+    # Construction de l'image PHP à partir du Dockerfile dans le répertoire courant
+    build: .
+    # Définition des volumes pour partager des fichiers ou répertoires
+    volumes:
+    # Le répertoire courant de l'hôte est monté dans /code du conteneur
+      - ./:/code
+  # Définition du service MySQL
+  mysql: 
+    # Utilisation de l'image officielle de MySQL en version 8.0, bas
+    image: mysql:8.2
+    # Définition des variables d'environnement pour le conteneur MySQL
+    environment:
+      # Définition du mot de passe root pour MySQL
+      MYSQL_ROOT_PASSWORD: root
+      # Définition du nom de la base de données
+      MYSQL_DATABASE: appdb
+      # Définition du nom de l'utilisateur
+      MYSQL_USER: user
+      # Définition du mot de passe de l'utilisateur
+      MYSQL_PASSWORD: password
+    # Définition des volumes pour partager des fichiers ou répertoires avec le conteneur MySQL
+    volumes: 
+      # Le répertoire courant de l'hôte est monté dans /var/lib/mysql
+      - data:/var/lib/mysql
+  # Utilisation de l'image officielle de PHPMyAdmin en version 5.1
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    # Définition du nom de la base de données
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8081:80"
+
+# Définition des volumes partagés entre les conteneurs
+volumes:
+  # Le volume data est créé pour stocker les données de MySQL
+  data:
+
+# Il est important de noter que les informations de connexion à la base de données 
+# (nom d'utilisateur, mot de passe, etc.) sont stockées en clair dans le fichier de configuration. 
+# Il est recommandé de les stocker de manière sécurisée, par exemple en utilisant des variables 
+# d'environnement ou des fichiers de configuration séparés.
